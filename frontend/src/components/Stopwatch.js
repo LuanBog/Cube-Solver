@@ -1,9 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+const useKey = (key, callback) => {
+  const callbackRef = useRef(callback);
+  let fired = false;
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [key]);
+
+  // Key Down
+  useEffect(() => {
+    const handle = (event) => {
+      if(!fired) {
+        if(event.code === key) {
+          callback(event);
+          fired = true;
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handle);
+    return () => document.removeEventListener('keydown', handle);
+  }, [key]);
+
+  // Key Up
+  useEffect(() => {
+    const handle = (event) => {
+      if(fired) {
+        if(event.code === key) {
+          fired = false;
+        }
+      }
+    }
+
+    document.addEventListener('keyup', handle);
+    return () => document.removeEventListener('keyup', handle);
+  }, [key]);
+}
 
 const Stopwatch = ({ generateScramble }) => {
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
+  // Detecting spacebar keypress
+  useKey('Space', () => {
+    setIsActive(state => {
+      if(state) {
+        generateScramble(20);
+      } else {
+        setTime(0);
+      }
+
+      return !state;
+    });
+  });
+
+  // Handles adding time when the stopwatch is active
   useEffect(() => {
     let interval = null;
 
@@ -20,16 +72,6 @@ const Stopwatch = ({ generateScramble }) => {
     }
   }, [isActive]);
 
-  const buttonClick = () => {
-    if (isActive === false) {
-      setIsActive(true);
-      setTime(0);
-    } else {
-      setIsActive(false);
-      generateScramble(20);
-    }
-  }
-
   return (
     <>
       <div className="timer">
@@ -43,8 +85,6 @@ const Stopwatch = ({ generateScramble }) => {
           {("0" + ((time / 10) % 100)).slice(-2)}
         </span>
       </div>
-
-      <button onClick={buttonClick}>Time {isActive ? <span>Off</span> : <span>On</span>}</button>
     </>
   );
 }
