@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Scramble from './components/Scramble';
-import Stopwatch from './components/Stopwatch';
+import MainTimer from './components/Timer/MainTimer';
+
+import './css/styles.css';
 
 const App = () => {
   const [scramble, setScramble] = useState('');
@@ -28,7 +30,7 @@ const App = () => {
       <h1>Cube Solver</h1>
 
       <Scramble scramble={scramble} generateScramble={generateScramble} />
-      <Stopwatch generateScramble={generateScramble} />
+      <MainTimer generateScramble={generateScramble} />
     </>
   );
 }
